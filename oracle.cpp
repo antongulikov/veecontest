@@ -146,10 +146,12 @@ void Oracle::preprocess() {
 
 void Oracle ::run() {
     double bestScore = -1;
+    int cnt = 0;
     Outputer bestOutput;
+    makeFlights();
     while (true) {
         double now = clock();
-        if ((now - startTime) / CLOCKS_PER_SEC > 29.5)
+        if ((now - startTime) / CLOCKS_PER_SEC > 29.7)
             break;
         reverseCopy();
         preprocess();
@@ -159,8 +161,10 @@ void Oracle ::run() {
             bestScore = getScore;
             bestOutput = outputer;
         }
+        cnt++;
         outputer.clear();
     }
+    cerr << cnt << endl;
     cerr << bestScore << endl;
     outputer = bestOutput;
 }

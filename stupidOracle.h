@@ -10,6 +10,7 @@ struct StupidOracle : public Oracle {
     void clearSolve();
     bool canDriverGetOrder(int driverId, int orderId);
     void assignOrder(int driverId, int orderId);
+    void assignOrder(int driverId, int orderId, int secondId);
     int StickTime(int driverId, int orderId);
     virtual ~StupidOracle(){}
     bool flag;

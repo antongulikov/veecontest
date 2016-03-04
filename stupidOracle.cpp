@@ -21,6 +21,7 @@ void StupidOracle::solve() {
         wannaBeHired.insert(i);
     for (int q = 0; q < flights.size(); q++) {
         vector <Person> currentFlight = flights[q];
+        random_shuffle(currentFlight.begin(), currentFlight.end());
         int n = (int) currentFlight.size();
         vector<bool> ok(n, false);
         for (int i = 0; i < n; i++) {
@@ -95,12 +96,13 @@ void StupidOracle::solve() {
             notDone.erase(snd);
             ok[pi] = ok[pj] = true;
         }
-        currentFlight.clear();
-        for (int i = 0; i < flights[q].size(); i++) {
+        vector < Person> tmpVector;
+        tmpVector.clear();
+        for (int i = 0; i < currentFlight.size(); i++) {
             if (!ok[i])
-                currentFlight.push_back(flights[q][i]);
+                tmpVector.push_back(currentFlight[i]);
         }
-
+        currentFlight = tmpVector;
         for (int i = 0; i < currentFlight.size(); i++) {
             int orderId = currentFlight[i].id;
             int bestStick = (int) 1e9;
@@ -350,5 +352,5 @@ int StupidOracle::StickTime(int dr1, int fst, int sec) {
     Driver &dr = drivers[dr1];
     Person &pr1 = persons[fst];
     Person &pr2 = persons[sec];
-    return city.getDist(dr.currentCity, pr1.from) + city.getDist(pr1.from, pr1.to) + city.getDist(pr1.to, pr2.to);
+    return pr1.queryTime + city.getTime(pr1.from, pr1.to) + city.getTime(pr1.to, pr2.to);
 }

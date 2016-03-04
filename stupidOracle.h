@@ -5,7 +5,7 @@
 #include "oracle.h"
 
 struct StupidOracle : public Oracle {
-    StupidOracle();
+    StupidOracle(double debug = 5) : Oracle(debug) { }
     void solve();
     void clearSolve();
     bool canDriverGetOrder(int driverId, int orderId);

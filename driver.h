@@ -25,6 +25,7 @@ struct Driver {
 
     Driver(int id = 0, int did = 0) : id_garage(id), did(did) {
         currentDistance = 0;
+        inAiport = false;
         currentCity = id;
         restTime = 9 * 60 * 60;
         onMove = false;
@@ -34,5 +35,8 @@ struct Driver {
         onWorkTime = make_pair(start, finish);
         currentTime = start;
     }
+
+    bool inAiport;
+
 
 };

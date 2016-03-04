@@ -19,6 +19,7 @@ void Oracle::moveDriver(int driverId, int cityId) {
     dr.currentTime += city.getTime(dr.currentCity, cityId);
     dr.currentCity = cityId;
     dr.onMove = true;
+    dr.inAiport = false;
     outputer.addActionToDriver(driverId, actionBuilder.getAction());
 }
 
@@ -48,6 +49,8 @@ void Oracle::putOut(int driverId, int personId) {
     actionBuilder.setAction(actions::drop1);
     actionBuilder.setTime(dr.currentTime);
     actionBuilder.setFirst(pr.id);
+    if (pr.toAirport)
+        dr.inAiport = true;
     dr.currentTime += 10 * 60;
     for (int i = 0; i < dr.passengers.size(); i++)
         if (dr.passengers[i].id == personId) {
@@ -62,6 +65,8 @@ void Oracle::putOut(int driverId, int personId, int personId2) {
     Driver &dr = drivers[driverId];
     Person &pr = persons[personId];
     Person &pr2 = persons[personId2];
+    if (pr.toAirport)
+        dr.inAiport = true;
     actionBuilder.setAction(actions::drop2);
     actionBuilder.setTime(dr.currentTime);
     actionBuilder.setFirst(pr.id);
@@ -154,7 +159,7 @@ void Oracle ::run() {
     makeFlights();
     while (true) {
         double now = clock();
-        if ((now - startTime) / CLOCKS_PER_SEC > 29.7)
+        if ((now - startTime) / CLOCKS_PER_SEC > workTime)
             break;
         reverseCopy();
         preprocess();

@@ -4,7 +4,6 @@
 
 #include "stupidOracle.h"
 
-StupidOracle::StupidOracle() { }
 
 void StupidOracle::solve() {
     flag = rand() % 2;
@@ -206,6 +205,8 @@ bool StupidOracle::canDriverGetOrder(int driverId, int orderId) {
 int StupidOracle::StickTime(int driverId, int orderId) {
     Person &pr = persons[orderId];
     Driver &dr = drivers[driverId];
+    if (pr.toAirport && dr.inAiport || !pr.toAirport && !dr.inAiport)
+        dr.did = dr.did;
     int finTime = 0;
     if (!pr.toAirport) {
         finTime = pr.queryTime + city.getTime(pr.from, pr.to) + 20 * 60;
@@ -352,5 +353,8 @@ int StupidOracle::StickTime(int dr1, int fst, int sec) {
     Driver &dr = drivers[dr1];
     Person &pr1 = persons[fst];
     Person &pr2 = persons[sec];
-    return pr1.queryTime + city.getTime(pr1.from, pr1.to) + city.getTime(pr1.to, pr2.to);
+    int finTime = pr1.queryTime + city.getTime(pr1.from, pr1.to) + city.getTime(pr1.to, pr2.to);
+    finTime -= dr.currentTime;
+    int di = city.getDist(dr.currentCity, pr1.from) + city.getDist(pr1.from, pr1.to) + city.getDist(pr1.to, pr2.to);
+    return finTime * 60 + di;
 }

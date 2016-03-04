@@ -13,7 +13,10 @@
 
 struct Oracle {
 
-    Oracle(){
+    double workTime;
+
+    Oracle(double debug = 5){
+        workTime = debug;
         startTime = clock();
         drivers.clear();
         persons.clear();

@@ -21,14 +21,11 @@ void StupidOracle::solve() {
             wannaBeHired.insert(i);
         vector<pair<long long, int> > orders;
         orders.clear();
-        mult = rand() % 4;
-        for (int i = 0; i < qSize; i++)
-            orders.push_back({(persons[i].queryTime -
-                               persons[i].toAirport * (20 * 60 + 1.5 * city.getTime(persons[i].from, persons[i].to)) *
-                               flag2 +
-                               (1 - flag2) * WaitTime) * 1ll * 1000000 * mult +
-                              (3) * city.getDist(persons[i].from, persons[i].to), persons[i].id});
-        sort(orders.begin(), orders.end());
+    mult = rand() % 4 + 1;
+    for (auto i : notDone)
+        orders.push_back({(persons[i].queryTime - persons[i].toAirport * ((20 * 60 + 1.5 * city.getTime(persons[i].from, persons[i].to)) * flag2 +
+                                                                          (1 - flag2) * WaitTime)) * 1ll * 1000000 * mult + 3 * city.getDist(persons[i].from, persons[i].to), persons[i].id});
+    sort(orders.begin(), orders.end());
         for (int i = 0; i < orders.size(); i++) {
             int orderId = orders[i].second;
             int bestStick = (int) 1e9;
@@ -173,10 +170,10 @@ void StupidOracle::clearSolve() {
     }
     vector < pair < long long, int> > orders;
     orders.clear();
-    mult = rand() % 4;
+    mult = rand() % 4 + 1;
     for (auto i : notDone)
-        orders.push_back({(persons[i].queryTime - persons[i].toAirport * (20 * 60 + 1.5 * city.getTime(persons[i].from, persons[i].to)) * flag2 +
-                           (1 - flag2) * WaitTime) * 1ll * 1000000 * mult + (3 ) * city.getDist(persons[i].from, persons[i].to), persons[i].id});
+        orders.push_back({(persons[i].queryTime - persons[i].toAirport * ((20 * 60 + 1.5 * city.getTime(persons[i].from, persons[i].to)) * flag2 +
+                                                                          (1 - flag2) * WaitTime)) * 1ll * 1000000 * mult + 3 * city.getDist(persons[i].from, persons[i].to), persons[i].id});
     sort(orders.begin(), orders.end());
     for (int i = 0; i < orders.size(); i++) {
         int orderId = orders[i].second;
@@ -234,4 +231,14 @@ void StupidOracle::clearSolve() {
         moveDriver(x.second, dr.id_garage);
         home(x.second);
     }
+}
+
+bool StupidOracle::canGet2Order(int dId, int fId, int sId) {
+    if (!canDriverGetOrder(dId, fId))
+        return false;
+    if (!canDriverGetOrder(dId, sId))
+        return false;
+    Driver &dr = drivers[dId];
+    Person &pr1 = persons[fId];
+    Person &pr2 = persons[sId];
 }

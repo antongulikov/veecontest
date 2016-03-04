@@ -31,7 +31,7 @@ void StupidOracle::solve() {
             int pj = -1;
             int h1 = persons[fst].home;
             int snd = -1;
-            for (int j = 0; j < n; j++) {
+            for (int j = 0; j < n; j++)if (i != j) {
                 if (ok[j])
                     continue;
                 if (snd == -1 or city.getDist(h1, persons[snd].home) >
@@ -46,7 +46,7 @@ void StupidOracle::solve() {
             int pos = -1;
             for (auto x : currentFree)
                 if (canGet2Order(x.second, fst, snd)) {
-                    int value = StickTime(x.second, snd);
+                    int value = StickTime(x.second, fst, snd);
                     if (bestStick > value) {
                         bestStick = value;
                         pos = x.second;
@@ -67,7 +67,7 @@ void StupidOracle::solve() {
             may_be_new.clear();
             for (auto x : wannaBeHired) {
                 if (canGet2Order(x, fst, snd)) {
-                    int value = StickTime(x, fst);
+                    int value = StickTime(x, fst, snd);
                     may_be_new.push_back({value, x});
                 }
             }
@@ -318,16 +318,20 @@ bool StupidOracle::canGet2Order(int dId, int fId, int sId) {
     Driver &dr = drivers[dId];
     Person &pr1 = persons[fId];
     Person &pr2 = persons[sId];
-    if (!pr1.toAirport) {
-        int spendTime = city.getTime(dr.currentCity, pr1.from);
-        spendTime += 20 * 60 + city.getTime(pr1.to, pr2.to);
-        spendTime += city.getTime(pr1.from, pr1.to) + city.getTime(pr2.to, dr.id_garage);
-        if (dr.currentTime + spendTime > dr.onWorkTime.second)
+    if (pr1.toAirport)
+        return false;
+    int spendTime = city.getTime(dr.currentCity, pr1.from);
+    int onR = 0;
+        onR += 30 * 60 + city.getTime(pr1.to, pr2.to);
+        onR += city.getTime(pr1.from, pr1.to) + city.getTime(pr2.to, dr.id_garage);
+    int finishTime = pr1.queryTime + onR;
+        if (dr.restTime < spendTime + onR)
             return false;
-        return city.getTime(pr2.from, pr2.to) + 40 * 60 >=
-               city.getTime(pr1.from, pr1.to) + city.getTime(pr1.to, pr2.to);
-    }
-    return false;
+        if (finishTime > dr.onWorkTime.second)
+            return false;
+    if (city.getTime(pr2.from, pr2.to) + 40 * 60 < city.getTime(pr1.from, pr1.to) + city.getTime(pr1.to, pr2.to))
+            return false;
+    return true;
 }
 
 void StupidOracle::assignOrder(int driverId, int orderId, int secondId) {
@@ -340,4 +344,11 @@ void StupidOracle::assignOrder(int driverId, int orderId, int secondId) {
     putOut(driverId, orderId);
     moveDriver(driverId, fi);
     putOut(driverId, secondId);
+}
+
+int StupidOracle::StickTime(int dr1, int fst, int sec) {
+    Driver &dr = drivers[dr1];
+    Person &pr1 = persons[fst];
+    Person &pr2 = persons[sec];
+    return city.getDist(dr.currentCity, pr1.from) + city.getDist(pr1.from, pr1.to) + city.getDist(pr1.to, pr2.to);
 }

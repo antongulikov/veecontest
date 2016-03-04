@@ -77,6 +77,9 @@ void Oracle::putOut(int driverId, int personId, int personId2) {
 
 void Oracle::home(int driverId) {
     Driver &dr = drivers[driverId];
+    if (dr.currentTime > dr.onWorkTime.second) {
+        cerr << dr.currentTime << " " << dr.currentDistance << " " << dr.onWorkTime.second << endl;
+    }
     assert(dr.currentTime <= dr.onWorkTime.second);
     actionBuilder.setAction(actions::end);
     outputer.addActionToDriver(driverId, actionBuilder.getAction());
@@ -217,7 +220,8 @@ void Oracle::makeFlights() {
     vector < Person > flight;
     flight.push_back(persons[0]);
     for (int i = 1; i < persons.size(); i++) {
-        if (persons[i].queryTime == persons[i - 1].queryTime && persons[i].to == persons[i - 1].to) {
+        if (persons[i].queryTime == persons[i - 1].queryTime && (persons[i].to == persons[i - 1].to && persons[i].toAirport ||
+                                                                !persons[i].toAirport && persons[i].from == persons[i - 1].from)) {
             flight.push_back(persons[i]);
         } else {
             flights.push_back(flight);

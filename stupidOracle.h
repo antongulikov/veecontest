@@ -12,6 +12,7 @@ struct StupidOracle : public Oracle {
     void assignOrder(int driverId, int orderId);
     void assignOrder(int driverId, int orderId, int secondId);
     int StickTime(int driverId, int orderId);
+    int StickTime(int dr, int fst, int sec);
     virtual ~StupidOracle(){}
     bool flag;
     bool canGet2Order(int dId, int fId, int sId);

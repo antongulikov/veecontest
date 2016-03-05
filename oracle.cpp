@@ -17,7 +17,7 @@ void Oracle::moveDriver(int driverId, int cityId) {
     dr.restTime -= duringTime;
     dr.currentDistance += city.getDist(dr.currentCity, cityId);
     dr.currentTime += city.getTime(dr.currentCity, cityId);
-    dr.currentCity = cityId;
+    dr.setCity(cityId);
     dr.onMove = true;
     dr.inAiport = false;
     outputer.addActionToDriver(driverId, actionBuilder.getAction());
@@ -206,6 +206,9 @@ void Oracle::putIn(int driverId, int personId, int personId2) {
     if (!pr.toAirport) {
         actionTime = pr.queryTime;
     }
+    if (pr.toAirport){
+        assert(pr.to == pr2.to);
+    }
     actionBuilder.setTime(actionTime);
     actionBuilder.setFirst(pr.id);
     actionBuilder.setSecond(pr2.id);
@@ -237,4 +240,18 @@ void Oracle::makeFlights() {
         flights.push_back(flight);
     }
     reverseCopy();
+}
+
+int Oracle::finishTime(int driverId, int orderId) {
+    Person &pr = persons[orderId];
+    Driver &dr = drivers[driverId];
+    if (pr.toAirport && dr.inAiport || !pr.toAirport && !dr.inAiport)
+        dr.did = dr.did;
+    int finTime = 0;
+    if (!pr.toAirport) {
+        finTime = pr.queryTime + city.getTime(pr.from, pr.to) + 20 * 60;
+    } else {
+        finTime = pr.queryTime;
+    }
+    return finTime;
 }

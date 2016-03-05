@@ -9,7 +9,7 @@
 struct Action {
 public:
 
-    Action& getInstance() {
+    Action &getInstance() {
         static Action instance;
         return instance;
     }
@@ -43,20 +43,20 @@ public:
                 result += " " + to_str(actionVertex);
                 break;
             }
-            case actions:: pick1: {
+            case actions::pick1: {
                 result += " " + to_str(firstP);
                 break;
             }
-            case actions:: drop1: {
+            case actions::drop1: {
                 result += " " + to_str(firstP);
                 break;
             }
-            case actions:: pick2: {
+            case actions::pick2: {
                 result += " " + to_str(firstP);
                 result += " " + to_str(secondP);
                 break;
             }
-            case actions:: drop2: {
+            case actions::drop2: {
                 result += " " + to_str(firstP);
                 result += " " + to_str(secondP);
                 break;
@@ -67,8 +67,10 @@ public:
 
 
 public:
-    Action(){}
+    Action() { }
+
     string actionRepr[6] = {"move", "pick1", "pick2", "drop1", "drop2", "end"};
+
     string to_str(int value) {
         string ret = "";
         if (value == 0)
@@ -80,6 +82,7 @@ public:
         reverse(ret.begin(), ret.end());
         return ret;
     }
+
     actions actionType;
     int actionTime, actionVertex, firstP, secondP;
 };

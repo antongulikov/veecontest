@@ -15,7 +15,7 @@ struct Oracle {
 
     double workTime;
 
-    Oracle(double debug = 5){
+    Oracle(double debug = 5) {
         workTime = debug;
         startTime = clock();
         drivers.clear();
@@ -25,7 +25,8 @@ struct Oracle {
         houses.clear();
     }
 
-    Oracle(Oracle &other) : seed(other.seed), aSize(other.aSize), qSize(other.qSize), dSize(other.dSize), driverSize(other.driverSize){
+    Oracle(Oracle &other) : seed(other.seed), aSize(other.aSize), qSize(other.qSize), dSize(other.dSize),
+                            driverSize(other.driverSize) {
         drivers = other.drivers;
         persons = other.persons;
         airports = other.airports;
@@ -41,11 +42,11 @@ struct Oracle {
             }
     }
 
-    void readSeed(){
+    void readSeed() {
         cin >> seed;
     }
 
-    void readSizes(){
+    void readSizes() {
         cin >> aSize >> dSize >> qSize >> driverSize;
     }
 
@@ -83,7 +84,7 @@ struct Oracle {
         for (int i = 0; i < driverSize; i++) {
             int gar = 0, start = 0, fin = 0;
             cin >> gar >> start >> fin;
-            Driver dr = Driver(gar, i);
+            Driver dr = Driver(gar, i, aSize);
             dr.set_time(start, fin);
             drivers.push_back(dr);
         }
@@ -113,21 +114,25 @@ struct Oracle {
     void showStat();
 
     void copyElements();
+
     void reverseCopy();
+
     void preprocess();
 
-    vector < Driver > drivers,copyDrivers;
-    vector < Person > persons, copyPersons;
-    vector < Vertex > airports, copyAirports;
-    vector < Vertex > garages, copyGarages;
-    vector < Vertex > houses, copyHoueses;
-    set <int> notDone;
+    vector<Driver> drivers, copyDrivers;
+    vector<Person> persons, copyPersons;
+    vector<Vertex> airports, copyAirports;
+    vector<Vertex> garages, copyGarages;
+    vector<Vertex> houses, copyHoueses;
+    set<int> notDone;
     City city;
     Outputer outputer;
     int seed;
     int dSize, aSize, qSize, driverSize, N;
-    vector < vector < Person> > flights;
-    virtual ~Oracle() {}
+    vector<vector<Person> > flights;
+
+    virtual ~Oracle() { }
+
     Action actionBuilder;
 
     double calcScore();
@@ -135,14 +140,25 @@ struct Oracle {
     void run();
 
     void moveDriver(int driverId, int cityid);
+
     void putIn(int driverId, int personId);
+
     void putOut(int driverId, int personId);
+
     void putIn(int driverId, int personId, int personId2);
+
     void putOut(int driverId, int personId, int personId2);
+
     void home(int driverId);
+
     int WaitTime;
     double startTime;
+
     virtual bool canDriverGetOrder(int driverId, int orderId) = 0;
+
     virtual void solve() = 0;
+
     void makeFlights();
+
+    int finishTime(int driverId, int personId);
 };

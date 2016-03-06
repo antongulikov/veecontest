@@ -1,6 +1,6 @@
 import sys
 
-files = ["vertex.h", "city.h", "action.h", "person.h" , "outputer.h", "driver.h", "oracle.h", 
+files = ["gassa.h.h", "vertex.h", "city.h", "action.h", "person.h" , "outputer.h", "driver.h", "oracle.h", 
 		"oracle.cpp", "stupidOracle.h", "stupidOracle.cpp", "main.cpp"]
 
 program = "#include <bits/stdc++.h> \n\nusing namespace std;"

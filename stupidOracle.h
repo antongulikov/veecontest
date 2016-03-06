@@ -17,9 +17,9 @@ struct StupidOracle : public Oracle {
 
     void assignOrder(int driverId, int orderId, int secondId);
 
-    int StickTime(int driverId, int orderId);
+    int stickTime(int driverId, int orderId);
 
-    int StickTime(int dr, int fst, int sec, bool toA);
+    int stickTime(int dr, int fst, int sec, bool toA);
 
     virtual ~StupidOracle() { }
 
@@ -30,4 +30,6 @@ struct StupidOracle : public Oracle {
     int aiportRand;
 
     bool get2InTheCity(int driderId, int fstId, int secId);
+
+    int getMininalTime(int dId, int fstId, int secId);
 };

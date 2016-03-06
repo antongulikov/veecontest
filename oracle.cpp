@@ -5,6 +5,8 @@
 #include "oracle.h"
 
 
+
+
 void Oracle::moveDriver(int driverId, int cityId) {
     Driver &dr = drivers[driverId];
     // Уже у нуженм городе
@@ -148,7 +150,7 @@ double Oracle::calcScore() {
 }
 
 void Oracle::preprocess() {
-    srand(rand());
+    //srand(rand());
 }
 
 
@@ -169,6 +171,7 @@ void Oracle ::run() {
             bestScore = getScore;
             bestOutput = outputer;
         }
+        //break;
         cnt++;
         outputer.clear();
     }
@@ -206,9 +209,6 @@ void Oracle::putIn(int driverId, int personId, int personId2) {
     if (!pr.toAirport) {
         actionTime = pr.queryTime;
     }
-    if (pr.toAirport){
-        assert(pr.to == pr2.to);
-    }
     actionBuilder.setTime(actionTime);
     actionBuilder.setFirst(pr.id);
     actionBuilder.setSecond(pr2.id);
@@ -229,7 +229,7 @@ void Oracle::makeFlights() {
     flight.push_back(persons[0]);
     for (int i = 1; i < persons.size(); i++) {
         if (persons[i].queryTime == persons[i - 1].queryTime && (persons[i].to == persons[i - 1].to && persons[i].toAirport ||
-                                                                !persons[i].toAirport && persons[i].from == persons[i - 1].from)) {
+                                                                 !persons[i].toAirport && persons[i].from == persons[i - 1].from)) {
             flight.push_back(persons[i]);
         } else {
             flights.push_back(flight);
@@ -240,8 +240,7 @@ void Oracle::makeFlights() {
         flights.push_back(flight);
     }
     reverseCopy();
-}
-
+}//
 int Oracle::finishTime(int driverId, int orderId) {
     Person &pr = persons[orderId];
     Driver &dr = drivers[driverId];

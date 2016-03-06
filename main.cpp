@@ -3,10 +3,8 @@
 #include "stupidOracle.h"
 
 int main() {
-    srand(time(0));
-    ios_base :: sync_with_stdio(false);
-    cin.tie(0);
-    StupidOracle mainOracle;
+    srand(2);
+    StupidOracle mainOracle(29.7);
     mainOracle.readData();
     //Oracle copyOracle(mainOracle);
     mainOracle.run();

@@ -11,6 +11,7 @@
 #include "vertex.h"
 #include "outputer.h"
 
+
 struct Oracle {
 
     double workTime;
@@ -41,18 +42,28 @@ struct Oracle {
                 city.setDist(i, j, other.city.getDist(i, j));
             }
     }
+    Test test;
 
     void readSeed() {
         cin >> seed;
+        test.generate (seed);
     }
 
+    int abc;
+
     void readSizes() {
-        cin >> aSize >> dSize >> qSize >> driverSize;
+        abc = 0;
+        aSize = test.a;
+        dSize = test.g;
+        qSize = test.q;
+        driverSize = test.d;
     }
 
     Vertex readVertex() {
         int x, y;
-        cin >> x >> y;
+        x = test.point[abc].x;
+        y = test.point[abc].y;
+        abc++;
         return Vertex(x, y);
     }
 
@@ -76,14 +87,19 @@ struct Oracle {
             vv.setId(i);
             houses.push_back(vv);
         }
+        abc = 0;
         for (int i = 0; i < qSize; i++) {
             int fr, to, mo;
-            cin >> fr >> to >> mo;
+            fr = test.query[i].from;
+            to = test.query[i].to;
+            mo = test.query[i].moment.value;
             persons.push_back(Person(fr, to, mo, i));
         }
         for (int i = 0; i < driverSize; i++) {
             int gar = 0, start = 0, fin = 0;
-            cin >> gar >> start >> fin;
+            gar = test.driver[i].garage;
+            start = test.driver[i].momentStart.value;
+            fin = test.driver[i].momentFinish.value;
             Driver dr = Driver(gar, i, aSize);
             dr.set_time(start, fin);
             drivers.push_back(dr);
@@ -92,16 +108,12 @@ struct Oracle {
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                int x;
-                cin >> x;
-                city.setDist(i, j, x);
+                city.setDist(i, j, test.gdist[i][j]);
             }
         }
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                int x;
-                cin >> x;
-                city.setTime(i, j, x);
+                city.setTime(i, j, test.gtime[i][j].value);
             }
         }
         copyElements();

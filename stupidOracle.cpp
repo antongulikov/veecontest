@@ -402,7 +402,12 @@ int StupidOracle::getMininalTime(int dId, int fstId, int secId) {
     int timsa = city.getTime(pr2.from, pr2.to);
     int timfs = city.getTime(pr1.from, pr2.from);
     int tof = city.getTime(dr.currentCity, pr1.from);
-    for (int x = dr.currentTime; x <= pr1.queryTime - timfa; x++) {
+    int left = pr1.queryTime - tof - 80 * 60 - timfa;
+    left = max(left, dr.currentTime);
+    left = max(left, pr2.queryTime - tof - 10 * 60 - timfs - 80 * 60 - timsa);
+    int right = pr1.queryTime - timfs - tof - 30 * 60 - timsa;
+    right = min(right, pr2.queryTime - timfs - tof - 30 * 60 - timsa);
+    /*for (int x = dr.currentTime; x <= pr1.queryTime - timfa; x += 10) {
         int in1 = x + tof;
         if (pr1.queryTime - in1 > 60 * 60 + timfa + 20 * 60)
             continue;
@@ -413,6 +418,33 @@ int StupidOracle::getMininalTime(int dId, int fstId, int secId) {
         if (fin > pr1.queryTime || fin > pr2.queryTime)
             continue;
         return x;
-    }
-    return -1;
+    }*/
+    if (left > right)
+        return -1;
+    return left;
+}
+
+int StupidOracle::getMininalTime(int dId, int fstId) {
+    Driver &dr = drivers[dId];
+    Person &pr1 = persons[fstId];
+    int timfa = city.getTime(pr1.from, pr1.to);
+    int tof = city.getTime(dr.currentCity, pr1.from);
+    int left = pr1.queryTime - tof - 80 * 60 - timfa;
+    left = max(left, dr.currentTime);
+    int right = pr1.queryTime - tof - 30 * 60 - timfa;
+    /*for (int x = dr.currentTime; x <= pr1.queryTime - timfa; x += 10) {
+        int in1 = x + tof;
+        if (pr1.queryTime - in1 > 60 * 60 + timfa + 20 * 60)
+            continue;
+        int in2 = 10 * 60 + in1 + timfs;
+        if (pr2.queryTime - in2 > 60 * 60 + 20 * 60 + timsa)
+            continue;
+        int fin = in2 + timsa + 20 * 60;
+        if (fin > pr1.queryTime || fin > pr2.queryTime)
+            continue;
+        return x;
+    }*/
+    if (left > right)
+        return -1;
+    return left;
 }

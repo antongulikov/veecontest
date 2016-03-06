@@ -32,4 +32,5 @@ struct StupidOracle : public Oracle {
     bool get2InTheCity(int driderId, int fstId, int secId);
 
     int getMininalTime(int dId, int fstId, int secId);
+    int getMininalTime(int dId, int fstId);
 };

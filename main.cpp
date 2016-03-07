@@ -4,7 +4,7 @@
 
 int main() {
     srand(2);
-    StupidOracle mainOracle(29.6);
+    StupidOracle mainOracle(3);
     mainOracle.readData();
     //Oracle copyOracle(mainOracle);
     mainOracle.run();

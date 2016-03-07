@@ -20,7 +20,18 @@ void StupidOracle::solve() {
     for (int i = 0; i < driverSize; i++)
         wannaBeHired.insert(i);
     for (int q = 0; q < flights.size(); q++) {
-        vector <Person> currentFlight = flights[q];
+        vector <Person> currentFlight;
+        currentFlight.clear();
+        for (int i = 0; i < flights[q].size(); i++)
+            if (notDone.find(flights[q][i].id) != notDone.end()) {
+                currentFlight.push_back(flights[q][i]);
+            }
+        if (q + 1 < flights.size()) {
+            for (int i = 0; i < flights[q + 1].size(); i++)
+                if (notDone.find(flights[q + 1][i].id) != notDone.end()) {
+                    currentFlight.push_back(flights[q + 1][i]);
+                }
+        }
         random_shuffle(currentFlight.begin(), currentFlight.end());
         int n = (int) currentFlight.size();
         vector<bool> ok(n, false);
@@ -323,6 +334,10 @@ bool StupidOracle::canGet2Order(int dId, int fId, int sId) {
     Person &pr2 = persons[sId];
     if (pr1.toAirport)
         return get2InTheCity(dId, fId, sId);
+    if (pr1.from != pr2.from)
+        return false;
+    if (pr1.queryTime != pr2.queryTime)
+        return false;
     int spendTime = city.getTime(dr.currentCity, pr1.from);
     int onR = 0;
         onR += 30 * 60 + city.getTime(pr1.to, pr2.to);

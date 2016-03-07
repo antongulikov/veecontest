@@ -1153,6 +1153,7 @@ struct StupidOracle : public Oracle {
     bool get2InTheCity(int driderId, int fstId, int secId);
 
     int getMininalTime(int dId, int fstId, int secId);
+    int getMininalTime(int dId, int fstId);
 };//
 // Created by scorpion on 02.03.16.
 //
@@ -1344,10 +1345,7 @@ bool StupidOracle::canDriverGetOrder(int driverId, int orderId) {
         return false;
     // Не успею довезти парня в аэропорт
     if (pr.toAirport) {
-        int ti = dr.currentTime + city.getTime(dr.currentCity, pr.from) + 20 * 60 + city.getTime(pr.from, pr.to);
-        if (ti > pr.queryTime)
-            return false;
-        if (ti < pr.queryTime - 60 * 60 && (flag == 0)) ////!!!! вернусть && flag == 0
+        if (getMininalTime(driverId, orderId) == -1)
             return false;
     }
 
@@ -1373,14 +1371,19 @@ int StupidOracle::stickTime(int driverId, int orderId) {
 void StupidOracle::assignOrder(int driverId, int orderId) {
     int st = persons[orderId].from;
     int fi = persons[orderId].to;
-    moveDriver(driverId, st);
-    if (persons[orderId].toAirport && flag) {
+    if (! persons[orderId].toAirport) {
+        moveDriver(driverId, st);
+        putIn(driverId, orderId);
+        moveDriver(driverId, fi);
+        putOut(driverId, orderId);
+    } else {
         Driver &dr = drivers[driverId];
-        dr.currentTime = max(dr.currentTime, persons[orderId].queryTime - 60 * 60 - 20 * 60 - city.getTime(st, fi));
+        dr.currentTime = getMininalTime(driverId, orderId);
+        moveDriver(driverId, st);
+        putIn(driverId, orderId);
+        moveDriver(driverId, fi);
+        putOut(driverId, orderId);
     }
-    putIn(driverId, orderId);
-    moveDriver(driverId, fi);
-    putOut(driverId, orderId);
 }
 
 void StupidOracle::clearSolve() {
@@ -1528,7 +1531,8 @@ int StupidOracle::stickTime(int dr1, int fst, int sec, bool toAir) {
         int di = city.getDist(dr.currentCity, pr1.from) + city.getDist(pr1.from, pr1.to) + city.getDist(pr1.to, pr2.to);
         return finTime * 60 + di;
     } else {
-        return max(pr2.queryTime, pr1.queryTime) - dr.currentTime;
+        int ti = getMininalTime(dr1, fst, sec);
+        return ti + city.getTime(dr.currentCity, pr1.from) + city.getTime(pr1.from, pr2.from) + city.getTime(pr2.from, pr2.to) - dr.currentTime;
     }
 }
 
@@ -1578,10 +1582,35 @@ int StupidOracle::getMininalTime(int dId, int fstId, int secId) {
     return left;
 }
 
+int StupidOracle::getMininalTime(int dId, int fstId) {
+    Driver &dr = drivers[dId];
+    Person &pr1 = persons[fstId];
+    int timfa = city.getTime(pr1.from, pr1.to);
+    int tof = city.getTime(dr.currentCity, pr1.from);
+    int left = pr1.queryTime - tof - 80 * 60 - timfa;
+    left = max(left, dr.currentTime);
+    int right = pr1.queryTime - tof - 30 * 60 - timfa;
+    /*for (int x = dr.currentTime; x <= pr1.queryTime - timfa; x += 10) {
+        int in1 = x + tof;
+        if (pr1.queryTime - in1 > 60 * 60 + timfa + 20 * 60)
+            continue;
+        int in2 = 10 * 60 + in1 + timfs;
+        if (pr2.queryTime - in2 > 60 * 60 + 20 * 60 + timsa)
+            continue;
+        int fin = in2 + timsa + 20 * 60;
+        if (fin > pr1.queryTime || fin > pr2.queryTime)
+            continue;
+        return x;
+    }*/
+    if (left > right)
+        return -1;
+    return left;
+}
+
 
 int main() {
     srand(2);
-    StupidOracle mainOracle(29.7);
+    StupidOracle mainOracle(29.6);
     mainOracle.readData();
     //Oracle copyOracle(mainOracle);
     mainOracle.run();

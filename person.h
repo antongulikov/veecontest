@@ -19,7 +19,7 @@ struct Person {
         airport = to + from - home;
         actualTime = queryTime;
         if (toAirport)
-            actualTime -= 60 * 60;
+            actualTime -= 60 * 60 * 1;
     }
 
     bool operator<(const Person &other) const {

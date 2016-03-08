@@ -6,176 +6,7 @@
 
 
 void StupidOracle::solve() {
-    flag = rand() % 2;
-    aiportRand = rand() % 30 + 20;
-    for (int i = 0; i < qSize; i++)
-         notDone.insert(i);
-    int mult = rand() % 20 + 80;
-    WaitTime = 60 * mult;
-    long long flag2 = rand() % 2;
-    int border = rand() % 5 + 3;
-    set<pair<long long, int> > currentFree;
-    vector<int> values(driverSize, 0);
-    set<int> wannaBeHired;
-    for (int i = 0; i < driverSize; i++)
-        wannaBeHired.insert(i);
-    for (int q = 0; q < flights.size(); q++) {
-        vector <Person> currentFlight;
-        currentFlight.clear();
-        for (int i = 0; i < flights[q].size(); i++)
-            if (notDone.find(flights[q][i].id) != notDone.end()) {
-                currentFlight.push_back(flights[q][i]);
-            }
-        if (q + 1 < flights.size()) {
-            for (int i = 0; i < flights[q + 1].size(); i++)
-                if (notDone.find(flights[q + 1][i].id) != notDone.end()) {
-                    currentFlight.push_back(flights[q + 1][i]);
-                }
-        }
-        random_shuffle(currentFlight.begin(), currentFlight.end());
-        int n = (int) currentFlight.size();
-        vector<bool> ok(n, false);
-        for (int i = 0; i < n; i++) {
-            if (ok[i])
-                continue;
-            int fst = currentFlight[i].id;
-            int pi = i;
-            int pj = -1;
-            int h1 = persons[fst].home;
-            int snd = -1;
-            for (int j = 0; j < n; j++)if (i != j) {
-                if (ok[j])
-                    continue;
-                if (snd == -1 or city.getDist(h1, persons[snd].home) >
-                                 city.getDist(h1, currentFlight[j].id)) {
-                    snd = currentFlight[j].id;
-                    pj = j;
-                }
-            }
-            if (snd == -1)
-                continue;
-            int bestStick = (int) 1e9;
-            int pos = -1;
-            for (auto x : currentFree)
-                if (canGet2Order(x.second, fst, snd)) {
-                    int value = stickTime(x.second, fst, snd, persons[fst].toAirport);
-                    if (bestStick > value) {
-                        bestStick = value;
-                        pos = x.second;
-                    }
-                }
-            if (pos != -1) {
-                currentFree.erase({values[pos], pos});
-                ok[pi] = true;
-                ok[pj] = true;
-                values[pos] += rand() % 10;
-                currentFree.insert({values[pos], pos});
-                assignOrder(pos, fst, snd);
-                notDone.erase(fst);
-                notDone.erase(snd);
-                continue;
-            }
-            vector<pair<int, int> > may_be_new;
-            may_be_new.clear();
-            for (auto x : wannaBeHired) {
-                if (canGet2Order(x, fst, snd)) {
-                    int value = stickTime(x, fst, snd, persons[snd].toAirport);
-                    may_be_new.push_back({value, x});
-                }
-            }
-            sort(may_be_new.begin(), may_be_new.end());
-            if (may_be_new.size() > 0) {
-                int value = may_be_new[0].first;
-                int x = may_be_new[0].second;
-                if (value < bestStick) {
-                    bestStick = value;
-                    pos = x;
-                }
-            }
-            if (pos == -1) {
-                continue;
-            }
-            for (int w = 1; w < min(border, (int) may_be_new.size()); w++) {
-                wannaBeHired.erase(may_be_new[w].second);
-                currentFree.insert({0, may_be_new[w].second});
-            }
-            wannaBeHired.erase(pos);
-            values[pos] += rand() % 10;
-            currentFree.insert({values[pos], pos});
-            assignOrder(pos, fst, snd);
-            notDone.erase(fst);
-            notDone.erase(snd);
-            ok[pi] = ok[pj] = true;
-        }
-        vector < Person> tmpVector;
-        tmpVector.clear();
-        for (int i = 0; i < currentFlight.size(); i++) {
-            if (!ok[i])
-                tmpVector.push_back(currentFlight[i]);
-        }
-        currentFlight = tmpVector;
-        for (int i = 0; i < currentFlight.size(); i++) {
-            int orderId = currentFlight[i].id;
-            int bestStick = (int) 1e9;
-            int pos = -1;
-            for (auto x : currentFree)
-                if (canDriverGetOrder(x.second, orderId)) {
-                    int value = stickTime(x.second, orderId);
-                    if (bestStick > value) {
-                        bestStick = value;
-                        pos = x.second;
-                    }
-                }
-            if (pos != -1) {
-                currentFree.erase({values[pos], pos});
-                values[pos] += rand() % 10;
-                currentFree.insert({values[pos], pos});
-                assignOrder(pos, orderId);
-                notDone.erase(orderId);
-                continue;
-            }
-            vector<pair<int, int> > may_be_new;
-            may_be_new.clear();
-            for (auto x : wannaBeHired) {
-                if (canDriverGetOrder(x, orderId)) {
-                    int value = stickTime(x, orderId);
-                    may_be_new.push_back({value, x});
-                }
-            }
-            sort(may_be_new.begin(), may_be_new.end());
-            if (may_be_new.size() > 0) {
-                int value = may_be_new[0].first;
-                int x = may_be_new[0].second;
-                if (value < bestStick) {
-                    bestStick = value;
-                    pos = x;
-                }
-            }
-            if (pos == -1) {
-                continue;
-            }
-            for (int w = 1; w < min(border, (int) may_be_new.size()); w++) {
-                wannaBeHired.erase(may_be_new[w].second);
-                currentFree.insert({0, may_be_new[w].second});
-            }
-            wannaBeHired.erase(pos);
-            values[pos] += rand() % 10;
-            currentFree.insert({values[pos], pos});
-            assignOrder(pos, orderId);
-            notDone.erase(orderId);
-        }
-    }
-
-    clearSolve();
-
-    for (auto x: currentFree) {
-        Driver &dr = drivers[x.second];
-        if (dr.currentCity == dr.id_garage)
-            continue;
-        moveDriver(x.second, dr.id_garage);
-        home(x.second);
-    }
-    // Go home!
+    solve1();
 }
 
 
@@ -201,7 +32,7 @@ bool StupidOracle::canDriverGetOrder(int driverId, int orderId) {
         return false;
     // Не успею довезти парня в аэропорт
     if (pr.toAirport) {
-        if (getMininalTime(driverId, orderId) == -1)
+        if (getMinimalTime(driverId, orderId) == -1)
             return false;
     }
 
@@ -221,7 +52,8 @@ int StupidOracle::stickTime(int driverId, int orderId) {
     Driver &dr = drivers[driverId];
     finTime -= dr.currentTime;
     int onTime = city.getTime(dr.currentCity, pr.from) + 20 * 60 + city.getTime(pr.from, pr.to);
-    return finTime * 60 + city.getDist(dr.currentCity, pr.from) + city.getDist(pr.from, pr.to);
+    // finTime???
+    return onTime * 60 + city.getDist(dr.currentCity, pr.from) + city.getDist(pr.from, pr.to);
 }
 
 void StupidOracle::assignOrder(int driverId, int orderId) {
@@ -234,7 +66,7 @@ void StupidOracle::assignOrder(int driverId, int orderId) {
         putOut(driverId, orderId);
     } else {
         Driver &dr = drivers[driverId];
-        dr.currentTime = getMininalTime(driverId, orderId);
+        dr.currentTime = getMinimalTime(driverId, orderId);
         moveDriver(driverId, st);
         putIn(driverId, orderId);
         moveDriver(driverId, fi);
@@ -369,7 +201,7 @@ void StupidOracle::assignOrder(int driverId, int orderId, int secondId) {
         putOut(driverId, secondId);
     } else {
         int mid = persons[secondId].from;
-        int staT = getMininalTime(driverId, orderId, secondId);
+        int staT = getMinimalTime(driverId, orderId, secondId);
         dr.currentTime = staT;
         moveDriver(driverId, st);
         putIn(driverId, orderId);
@@ -385,15 +217,10 @@ int StupidOracle::stickTime(int dr1, int fst, int sec, bool toAir) {
     Driver &dr = drivers[dr1];
     Person &pr1 = persons[fst];
     Person &pr2 = persons[sec];
-    if (!toAir) {
-        int finTime = pr1.queryTime + city.getTime(pr1.from, pr1.to) + city.getTime(pr1.to, pr2.to);
-        finTime -= dr.currentTime;
+        int finTime = finishTime(dr1, fst, sec);
+        int onTime = finTime - 2 * dr.currentTime + getMinimalTime(dr1, fst, sec);
         int di = city.getDist(dr.currentCity, pr1.from) + city.getDist(pr1.from, pr1.to) + city.getDist(pr1.to, pr2.to);
-        return finTime * 60 + di;
-    } else {
-        int ti = getMininalTime(dr1, fst, sec);
-        return ti + city.getTime(dr.currentCity, pr1.from) + city.getTime(pr1.from, pr2.from) + city.getTime(pr2.from, pr2.to) - dr.currentTime;
-    }
+        return onTime * 60 + di;
 }
 
 bool StupidOracle::get2InTheCity(int driderId, int fstId, int secId) {
@@ -407,62 +234,180 @@ bool StupidOracle::get2InTheCity(int driderId, int fstId, int secId) {
     Person &pr2 = persons[secId];
     if (pr1.to != pr2.to)
         return false;
-    return getMininalTime(driderId, fstId, secId) > -1;
+    return getMinimalTime(driderId, fstId, secId) > -1;
 }
 
-int StupidOracle::getMininalTime(int dId, int fstId, int secId) {
-    Driver &dr = drivers[dId];
-    Person &pr1 = persons[fstId];
-    Person &pr2 = persons[secId];
-    if (pr1.to != pr2.to)
-        return -1;
-    int timfa = city.getTime(pr1.from, pr1.to);
-    int timsa = city.getTime(pr2.from, pr2.to);
-    int timfs = city.getTime(pr1.from, pr2.from);
-    int tof = city.getTime(dr.currentCity, pr1.from);
-    int left = pr1.queryTime - tof - 80 * 60 - timfa;
-    left = max(left, dr.currentTime);
-    left = max(left, pr2.queryTime - tof - 10 * 60 - timfs - 80 * 60 - timsa);
-    int right = pr1.queryTime - timfs - tof - 30 * 60 - timsa;
-    right = min(right, pr2.queryTime - timfs - tof - 30 * 60 - timsa);
-    /*for (int x = dr.currentTime; x <= pr1.queryTime - timfa; x += 10) {
-        int in1 = x + tof;
-        if (pr1.queryTime - in1 > 60 * 60 + timfa + 20 * 60)
+
+void StupidOracle::solve1() {
+    int howMuch = 1 + rand() % 20;
+    aiportRand = rand() % 30 + 20;
+    for (int i = 0; i < qSize; i++)
+        notDone.insert(i);
+    int mult = rand() % 2;
+    WaitTime = 60 * mult;
+    long long flag2 = rand() % 2;
+    int border = rand() % 5 + 3;
+    set<pair<long long, int> > currentFree;
+    vector<int> values(driverSize, 0);
+    set<int> wannaBeHired;
+    for (int i = 0; i < driverSize; i++)
+        wannaBeHired.insert(i);
+    for (int q = 0; q < flights.size(); q++) {
+        vector <Person> currentFlight;
+        currentFlight.clear();
+        for (int w = 0; q + w < flights.size() && w < 1; w++) {
+            int u = q + w;
+            for (int i = 0; i < flights[u].size(); i++)
+                if (notDone.find(flights[u][i].id) != notDone.end()) {
+                    currentFlight.push_back(flights[u][i]);
+                }
+        }
+        random_shuffle(currentFlight.begin(), currentFlight.end());
+        int n = (int) currentFlight.size();
+        vector<bool> ok(n, false);
+        for (int i = 0; i < n; i++) {
+            if (ok[i])
+                continue;
+            int fst = currentFlight[i].id;
+            int pi = i;
+            int pj = -1;
+            int h1 = persons[fst].home;
+            int snd = -1;
+            for (int j = 0; j < n; j++)if (i != j) {
+                    if (ok[j])
+                        continue;
+                    if (snd == -1 or city.getDist(h1, persons[snd].home) >
+                                     city.getDist(h1, currentFlight[j].id)) {
+                        snd = currentFlight[j].id;
+                        pj = j;
+                    }
+                }
+            if (snd == -1)
+                continue;
+            int bestStick = (int) 1e9;
+            int pos = -1;
+            for (auto x : currentFree)
+                if (canGet2Order(x.second, fst, snd)) {
+                    int value = stickTime(x.second, fst, snd, persons[fst].toAirport);
+                    if (bestStick > value) {
+                        bestStick = value;
+                        pos = x.second;
+                    }
+                }
+            if (pos != -1) {
+                currentFree.erase({values[pos], pos});
+                ok[pi] = true;
+                ok[pj] = true;
+                values[pos] += rand() % 10;
+                currentFree.insert({values[pos], pos});
+                assignOrder(pos, fst, snd);
+                notDone.erase(fst);
+                notDone.erase(snd);
+                continue;
+            }
+            vector<pair<int, int> > may_be_new;
+            may_be_new.clear();
+            for (auto x : wannaBeHired) {
+                if (canGet2Order(x, fst, snd)) {
+                    int value = stickTime(x, fst, snd, persons[snd].toAirport);
+                    may_be_new.push_back({value, x});
+                }
+            }
+            sort(may_be_new.begin(), may_be_new.end());
+            if (may_be_new.size() > 0) {
+                int value = may_be_new[0].first;
+                int x = may_be_new[0].second;
+                if (value < bestStick) {
+                    bestStick = value;
+                    pos = x;
+                }
+            }
+            if (pos == -1) {
+                continue;
+            }
+            for (int w = 1; w < min(border, (int) may_be_new.size()); w++) {
+                wannaBeHired.erase(may_be_new[w].second);
+                currentFree.insert({0, may_be_new[w].second});
+            }
+            wannaBeHired.erase(pos);
+            values[pos] += rand() % 10;
+            currentFree.insert({values[pos], pos});
+            assignOrder(pos, fst, snd);
+            notDone.erase(fst);
+            notDone.erase(snd);
+            ok[pi] = ok[pj] = true;
+        }
+        vector < Person> tmpVector;
+        tmpVector.clear();
+        for (int i = 0; i < currentFlight.size(); i++) {
+            if (!ok[i])
+                tmpVector.push_back(currentFlight[i]);
+        }
+        currentFlight = tmpVector;
+        for (int i = 0; i < currentFlight.size(); i++) {
+            int orderId = currentFlight[i].id;
+            int bestStick = (int) 1e9;
+            int pos = -1;
+            for (auto x : currentFree)
+                if (canDriverGetOrder(x.second, orderId)) {
+                    int value = stickTime(x.second, orderId);
+                    if (bestStick > value) {
+                        bestStick = value;
+                        pos = x.second;
+                    }
+                }
+            if (pos != -1) {
+                currentFree.erase({values[pos], pos});
+                values[pos] += rand() % 10;
+                currentFree.insert({values[pos], pos});
+                assignOrder(pos, orderId);
+                notDone.erase(orderId);
+                continue;
+            }
+            vector<pair<int, int> > may_be_new;
+            may_be_new.clear();
+            for (auto x : wannaBeHired) {
+                if (canDriverGetOrder(x, orderId)) {
+                    int value = stickTime(x, orderId);
+                    may_be_new.push_back({value, x});
+                }
+            }
+            sort(may_be_new.begin(), may_be_new.end());
+            if (may_be_new.size() > 0) {
+                int value = may_be_new[0].first;
+                int x = may_be_new[0].second;
+                if (value < bestStick) {
+                    bestStick = value;
+                    pos = x;
+                }
+            }
+            if (pos == -1) {
+                continue;
+            }
+            for (int w = 1; w < min(border, (int) may_be_new.size()); w++) {
+                wannaBeHired.erase(may_be_new[w].second);
+                currentFree.insert({0, may_be_new[w].second});
+            }
+            wannaBeHired.erase(pos);
+            values[pos] += rand() % 10;
+            currentFree.insert({values[pos], pos});
+            assignOrder(pos, orderId);
+            notDone.erase(orderId);
+        }
+    }
+
+    clearSolve();
+
+    for (auto x: currentFree) {
+        Driver &dr = drivers[x.second];
+        if (dr.currentCity == dr.id_garage)
             continue;
-        int in2 = 10 * 60 + in1 + timfs;
-        if (pr2.queryTime - in2 > 60 * 60 + 20 * 60 + timsa)
-            continue;
-        int fin = in2 + timsa + 20 * 60;
-        if (fin > pr1.queryTime || fin > pr2.queryTime)
-            continue;
-        return x;
-    }*/
-    if (left > right)
-        return -1;
-    return left;
+        moveDriver(x.second, dr.id_garage);
+        home(x.second);
+    }
+    // Go home!
 }
 
-int StupidOracle::getMininalTime(int dId, int fstId) {
-    Driver &dr = drivers[dId];
-    Person &pr1 = persons[fstId];
-    int timfa = city.getTime(pr1.from, pr1.to);
-    int tof = city.getTime(dr.currentCity, pr1.from);
-    int left = pr1.queryTime - tof - 80 * 60 - timfa;
-    left = max(left, dr.currentTime);
-    int right = pr1.queryTime - tof - 30 * 60 - timfa;
-    /*for (int x = dr.currentTime; x <= pr1.queryTime - timfa; x += 10) {
-        int in1 = x + tof;
-        if (pr1.queryTime - in1 > 60 * 60 + timfa + 20 * 60)
-            continue;
-        int in2 = 10 * 60 + in1 + timfs;
-        if (pr2.queryTime - in2 > 60 * 60 + 20 * 60 + timsa)
-            continue;
-        int fin = in2 + timsa + 20 * 60;
-        if (fin > pr1.queryTime || fin > pr2.queryTime)
-            continue;
-        return x;
-    }*/
-    if (left > right)
-        return -1;
-    return left;
+void StupidOracle::doHarlemShake(const vector<int> &dri) {
+    return;
 }

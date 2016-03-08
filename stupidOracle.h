@@ -17,6 +17,8 @@ struct StupidOracle : public Oracle {
 
     void assignOrder(int driverId, int orderId, int secondId);
 
+    void doHarlemShake(const vector <int> &dri);
+
     int stickTime(int driverId, int orderId);
 
     int stickTime(int dr, int fst, int sec, bool toA);
@@ -31,6 +33,5 @@ struct StupidOracle : public Oracle {
 
     bool get2InTheCity(int driderId, int fstId, int secId);
 
-    int getMininalTime(int dId, int fstId, int secId);
-    int getMininalTime(int dId, int fstId);
+    void solve1();
 };

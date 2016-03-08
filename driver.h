@@ -58,6 +58,10 @@ struct Driver {
         currentTime = start;
     }
 
+    bool operator < (const Driver &dr) const {
+        return (onWorkTime.first < dr.onWorkTime.first || onWorkTime.first == dr.onWorkTime.first && did < dr.did);
+    }
+
     bool inAiport;
 
 

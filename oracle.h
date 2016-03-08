@@ -117,10 +117,11 @@ struct Oracle {
             }
         }
         copyElements();
+        bestOutput = Outputer(drivers.size(), seed);
     }
 
     void finish() {
-        outputer.printAns();
+        bestOutput.printAns();
     }
 
     void showStat();
@@ -170,7 +171,27 @@ struct Oracle {
 
     virtual void solve() = 0;
 
+    virtual void doHarlemShake(const vector <int> &drivs) = 0;
+
     void makeFlights();
 
     int finishTime(int driverId, int personId);
+
+    int finishTime(int driverId, int personId, int secId);
+
+    int getMinimalTime(int dId, int Fid);
+
+    int getMinimalTime(int dId, int fstId, int secId);
+
+    double change(vector <int> &a, int p1, int p2);
+
+    double curVal;
+
+    vector <int> getDriversPosition(const Outputer &out);
+
+    double bestScore;
+    Outputer bestOutput;
+
+public:
+
 };

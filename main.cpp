@@ -3,7 +3,7 @@
 #include "stupidOracle.h"
 
 int main() {
-    srand(2);
+    srand(time(0));
     StupidOracle mainOracle(3);
     mainOracle.readData();
     //Oracle copyOracle(mainOracle);

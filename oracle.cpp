@@ -155,9 +155,8 @@ void Oracle::preprocess() {
 
 
 void Oracle ::run() {
-    double bestScore = -1;
+    bestScore = -1;
     int cnt = 0;
-    Outputer bestOutput;
     makeFlights();
     while (true) {
         double now = clock();
@@ -174,6 +173,55 @@ void Oracle ::run() {
         //break;
         cnt++;
         outputer.clear();
+    }
+    return;
+    vector <int> driversPosition = getDriversPosition(bestOutput);
+    const int STEPS_PER_TEMP = 3;
+    const double COOLING_FRACTION = 0.99;
+
+    int i1, i2;
+    double temperature;
+    double startVal;
+    double delta, merit, flip, index;
+
+    temperature = 1.0;
+
+    doHarlemShake(driversPosition);
+
+    curVal = -calcScore(); //initialize
+
+    int n = (int)drivers.size();
+    while (true) {
+        double now = clock();
+        if ((now - startTime) / CLOCKS_PER_SEC > 29)
+            break;
+        temperature *= COOLING_FRACTION;
+        startVal = curVal;
+
+        for (int j = 0; j < STEPS_PER_TEMP; j++) {
+            cnt++;
+            i1 = rand() % n;
+            i2 = rand() % n;
+
+            flip = (rand() % 1000000) * 1.0 / 999999.0;
+            delta = change(driversPosition, i1, i2);
+            index = (-delta / curVal) / temperature;
+            merit = 1.0 / (1.0 + exp(index));
+
+            //minimize energy
+            if (delta < 0) //good
+                curVal += delta;
+            else {
+                if (merit > flip) //not so good
+                    curVal += delta;
+                else {
+                    change(driversPosition, i2, i1);
+                }
+            }
+
+        }
+        if (curVal - startVal < 0.0) //succeed
+            temperature = temperature / COOLING_FRACTION;
     }
     cerr << cnt << endl;
     cerr << bestScore << endl;
@@ -244,13 +292,123 @@ void Oracle::makeFlights() {
 int Oracle::finishTime(int driverId, int orderId) {
     Person &pr = persons[orderId];
     Driver &dr = drivers[driverId];
-    if (pr.toAirport && dr.inAiport || !pr.toAirport && !dr.inAiport)
-        dr.did = dr.did;
     int finTime = 0;
     if (!pr.toAirport) {
         finTime = pr.queryTime + city.getTime(pr.from, pr.to) + 20 * 60;
     } else {
-        finTime = pr.queryTime;
+        finTime = getMinimalTime(driverId, orderId);
+        finTime += city.getTime(dr.currentCity, pr.from) + city.getTime(pr.from, pr.to) + 20 * 60;
     }
     return finTime;
+}
+
+
+int Oracle::getMinimalTime(int dId, int fstId) {
+    Driver &dr = drivers[dId];
+    Person &pr1 = persons[fstId];
+    if (!pr1.toAirport)
+        return pr1.queryTime;
+    int timfa = city.getTime(pr1.from, pr1.to);
+    int tof = city.getTime(dr.currentCity, pr1.from);
+    int left = pr1.queryTime - tof - 80 * 60 - timfa;
+    left = max(left, dr.currentTime);
+    int right = pr1.queryTime - tof - 30 * 60 - timfa;
+    /*for (int x = dr.currentTime; x <= pr1.queryTime - timfa; x += 10) {
+        int in1 = x + tof;
+        if (pr1.queryTime - in1 > 60 * 60 + timfa + 20 * 60)
+            continue;
+        int in2 = 10 * 60 + in1 + timfs;
+        if (pr2.queryTime - in2 > 60 * 60 + 20 * 60 + timsa)
+            continue;
+        int fin = in2 + timsa + 20 * 60;
+        if (fin > pr1.queryTime || fin > pr2.queryTime)
+            continue;
+        return x;
+    }*/
+    if (left > right)
+        return -1;
+    return left;
+}
+
+int Oracle::getMinimalTime(int dId, int fstId, int secId) {
+    Driver &dr = drivers[dId];
+    Person &pr1 = persons[fstId];
+    Person &pr2 = persons[secId];
+    if (!pr1.toAirport)
+        return pr1.queryTime;
+    if (pr1.to != pr2.to)
+        return -1;
+    int timfa = city.getTime(pr1.from, pr1.to);
+    int timsa = city.getTime(pr2.from, pr2.to);
+    int timfs = city.getTime(pr1.from, pr2.from);
+    int tof = city.getTime(dr.currentCity, pr1.from);
+    int left = pr1.queryTime - tof - 80 * 60 - timfa;
+    left = max(left, dr.currentTime);
+    left = max(left, pr2.queryTime - tof - 10 * 60 - timfs - 80 * 60 - timsa);
+    int right = pr1.queryTime - timfs - tof - 30 * 60 - timsa;
+    right = min(right, pr2.queryTime - timfs - tof - 30 * 60 - timsa);
+    /*for (int x = dr.currentTime; x <= pr1.queryTime - timfa; x += 10) {
+        int in1 = x + tof;
+        if (pr1.queryTime - in1 > 60 * 60 + timfa + 20 * 60)
+            continue;
+        int in2 = 10 * 60 + in1 + timfs;
+        if (pr2.queryTime - in2 > 60 * 60 + 20 * 60 + timsa)
+            continue;
+        int fin = in2 + timsa + 20 * 60;
+        if (fin > pr1.queryTime || fin > pr2.queryTime)
+            continue;
+        return x;
+    }*/
+    if (left > right)
+        return -1;
+    return left;
+}
+
+int Oracle::finishTime(int driverId, int personId, int secId) {
+    Person &pr1 = persons[personId];
+    Person &pr2 = persons[secId];
+    Driver &dr = drivers[driverId];
+    int finishTime = 0;
+    if (pr1.toAirport) {
+        finishTime = getMinimalTime(driverId, personId, secId);
+        finishTime += 30 * 60;
+        finishTime += city.getTime(dr.currentCity, pr1.from) + city.getTime(pr1.from, pr2.from) + city.getTime(pr2.from, pr2.to);
+    } else {
+        finishTime = getMinimalTime(driverId, personId, secId);
+        finishTime += 30 * 60;
+        finishTime += city.getTime(pr1.from, pr1.to) + city.getTime(pr1.to, pr2.to);
+    }
+    return finishTime;
+}
+
+double Oracle::change(vector<int> &a, int p1, int p2) {
+    swap(a[p1], a[p2]);
+    doHarlemShake(a);
+    double tt = calcScore();
+    if (tt > bestScore) {
+        bestOutput = outputer;
+        bestScore = tt;
+    }
+    outputer.clear();
+    return -tt - curVal;
+}
+
+vector<int> Oracle::getDriversPosition(const Outputer &out) {
+    vector <int> result;
+    vector <Driver> fir;
+    vector <Driver> sec;
+    result.clear();
+    for (int i = 0; i < out.ret.size(); i++) {
+        if (out.ret[i].size() > 2)
+            fir.push_back(drivers[i]);
+        else
+            sec.push_back(drivers[i]);
+    }
+    sort(fir.begin(), fir.end());
+    sort(sec.begin(), sec.end());
+    for (int i = 0; i < fir.size(); i++)
+        result.push_back(fir[i].did);
+    for (int i = 0; i < sec.size(); i++)
+        result.push_back(sec[i].did);
+    return result;
 }

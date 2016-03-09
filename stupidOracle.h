@@ -21,7 +21,7 @@ struct StupidOracle : public Oracle {
 
     int stickTime(int driverId, int orderId);
 
-    int stickTime(int dr, int fst, int sec, bool toA);
+    int stickTime(int dr, int fst, int sec, bool toA = false);
 
     virtual ~StupidOracle() { }
 
@@ -34,4 +34,6 @@ struct StupidOracle : public Oracle {
     bool get2InTheCity(int driderId, int fstId, int secId);
 
     void solve1();
+
+    bool inOrOut(const vector <int> &a);
 };

@@ -159,8 +159,7 @@ void Oracle ::run() {
     int cnt = 0;
     makeFlights();
     while (true) {
-        double now = clock();
-        if ((now - startTime) / CLOCKS_PER_SEC > workTime)
+        if ((double)(clock() - startTime) > 3 * CLOCKS_PER_SEC)
             break;
         reverseCopy();
         preprocess();
@@ -174,9 +173,13 @@ void Oracle ::run() {
         cnt++;
         outputer.clear();
     }
-    return;
-    vector <int> driversPosition = getDriversPosition(bestOutput);
-    const int STEPS_PER_TEMP = 3;
+    vector <int> driversPosition;
+    pair < vector <int> , int> tmpp = getDriversPosition(bestOutput);
+    driversPosition = tmpp.first;
+    int pos1 = tmpp.second;
+    //for (int i = 0; i < driversPosition.size(); i++)
+      //  driversPosition[i] = i;
+    const int STEPS_PER_TEMP = 10;
     const double COOLING_FRACTION = 0.99;
 
     int i1, i2;
@@ -192,8 +195,7 @@ void Oracle ::run() {
 
     int n = (int)drivers.size();
     while (true) {
-        double now = clock();
-        if ((now - startTime) / CLOCKS_PER_SEC > 29)
+        if ((double)(clock() - startTime) > workTime * CLOCKS_PER_SEC)
             break;
         temperature *= COOLING_FRACTION;
         startVal = curVal;
@@ -382,7 +384,13 @@ int Oracle::finishTime(int driverId, int personId, int secId) {
 }
 
 double Oracle::change(vector<int> &a, int p1, int p2) {
-    swap(a[p1], a[p2]);
+    int delta = min((int)a.size() - max(p1, p2) - 1, 10);
+    delta = max(delta, 1);
+    delta = 1;
+    for (int i = 0; i < delta; i++)
+        swap(a[p1 + i], a[p2 + i]);
+    reverseCopy();
+    preprocess();
     doHarlemShake(a);
     double tt = calcScore();
     if (tt > bestScore) {
@@ -393,7 +401,7 @@ double Oracle::change(vector<int> &a, int p1, int p2) {
     return -tt - curVal;
 }
 
-vector<int> Oracle::getDriversPosition(const Outputer &out) {
+pair < vector<int>, int> Oracle::getDriversPosition(const Outputer &out) {
     vector <int> result;
     vector <Driver> fir;
     vector <Driver> sec;
@@ -410,5 +418,5 @@ vector<int> Oracle::getDriversPosition(const Outputer &out) {
         result.push_back(fir[i].did);
     for (int i = 0; i < sec.size(); i++)
         result.push_back(sec[i].did);
-    return result;
+    return {result, fir.size()};
 }

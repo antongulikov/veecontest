@@ -106,9 +106,11 @@ struct Oracle {
         }
         city = City(N);
 
+        vector <double> tmp(N * N, 0);
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 city.setDist(i, j, test.gdist[i][j]);
+                tmp[i * N + j] = test.gdist[i][j];
             }
         }
         for (int i = 0; i < N; i++) {
@@ -118,6 +120,9 @@ struct Oracle {
         }
         copyElements();
         bestOutput = Outputer(drivers.size(), seed);
+        sort(tmp.begin(), tmp.end());
+        borderDist = tmp.back();
+
     }
 
     void finish() {
@@ -187,9 +192,11 @@ struct Oracle {
 
     double curVal;
 
-    vector <int> getDriversPosition(const Outputer &out);
+    pair < vector <int>, int> getDriversPosition(const Outputer &out);
 
     double bestScore;
+
+    double borderDist;
     Outputer bestOutput;
 
 public:
